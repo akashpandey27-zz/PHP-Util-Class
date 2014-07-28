@@ -1,0 +1,773 @@
+<?php
+
+class Util extends Connection{
+	/**
+	 * utility class
+	 *
+	 * @author Akash Pandey
+	 * @copyright Freeware
+	 * @copyright Free to distribute and use
+	 */
+	var $jsArray;
+	function __construct() {
+		parent::__construct();
+		date_default_timezone_set(TIMEZONE);
+				
+	}
+	
+	/**
+	 * Calculate difference in dates
+	 *
+	 * @param String(date) $sStartDate
+	 * @param String(date) $sFinalDate
+	 * @return Integer
+	 */
+	public function dateDiff($sStartDate, $sFinalDate){
+		$sDateI = explode("-", $sStartDate);
+		$sDateF = explode("-", $sFinalDate);
+	
+		$nStartDate = mktime(0, 0, 0, $sDateI[1], $sDateI[0], $sDateI[2]);
+		$nFinalDate = mktime(0, 0, 0, $sDateF[1], $sDateF[0], $sDateF[2]);
+	
+		return ($nStartDate > $nFinalDate) ?
+		floor(($nStartDate - $nFinalDate)/86400) : floor(($nFinalDate - $nStartDate)/86400);
+	}
+	
+	/**
+	 * Calculate age
+	 * The entry is the date of birth
+	 * Format: dd-mm-aaaa
+	 *
+	 * @param String(date) $dtBorn
+	 * @return Integer
+	 */
+	public function calculateAge($dtBorn){
+		$date1 		= str_replace("/" ,"-",$dtBorn);
+		$date2 		= date("d-m-Y"); // Today
+	
+		$result  	= $this->datediff("$date1", "$date2");
+		$years		= $result/365;
+		$age		= explode("." , $years);
+		return  $age[0];
+	}
+	/**
+	 * Alert
+	 *
+	 * @param String $msg
+	 */
+	public function alert($msg){
+		echo "<script language='javascript'>
+			
+					alert('".$msg."');
+				
+			  </script>";
+		
+	}
+	
+	/**
+	 * Alert and back to previous page
+	 *
+	 * @param String $msg
+	 */
+	public function alertBack($msg){
+		echo "<script language='javascript'>
+				<!--
+					alert('".$msg."');
+					history.back();
+				-->
+			  </script>";
+	}
+	
+	/**
+	 * Back to the previous page
+	 *
+	 */
+	public function goBack(){
+		echo "<script language='javascript'>
+				<!--
+					history.back();
+				-->
+			  </script>";
+	}
+	
+	/**
+	 * Close actual window
+	 *
+	 */
+	public function closeWindow(){
+		echo "<script language='javascript'>
+				<!--
+					window.close();
+				-->
+			  </script>";
+	}
+	
+	/**
+	 * Redirect page
+	 *
+	 * @param String $page
+	 */
+	public function redirect($page){
+		echo "<script language='javascript'>
+				<!--
+					location.href='".$page."';
+				-->
+			  </script>";
+	}
+	
+	
+	/**
+	 * Update current window
+	 *
+	 */
+	public function update(){
+		echo "<script language='javascript'>
+				<!--
+					window.location.reload();
+				-->
+			  </script>";
+	}
+	/**
+	 * Remove all the tags
+	 * Only de tag's name
+	 * Ex: leaveTags($str,'img','a')
+	 *
+	 * @return unknown
+	 */
+	public function leaveTags(){
+		$args = func_get_args();
+		$str = $args[0];
+		if(is_array($args)){
+			foreach($args as $arg){
+				if($args[0]!=$arg){
+					$pattern = "/\<".$arg."[^\>]*\>?/";
+					$str = preg_replace($pattern," ",$str);
+				}
+			}
+		}
+		return $str;
+	}
+	
+	/**
+	 * debugArray function use the print_r() function
+	 * and show html tag <pre></pre> to show correctly in your screen
+	 *
+	 * @param Array $array
+	 */
+	public function debugArray($array){
+		echo '<style>.debugArray{font-size:12px;color:#01FF00;position:fixed;bottom:10px;left:10px;background:rgba(0,0,0,0.8);padding:0 20px 0 20px;overflow:scroll;max-height:300px;max-width:600px;text-shadow:0 0 1px #333;}
+					 .debugArray div{font-size:15px;text-decoration:blink;float:left;position:absolute;bottom:10px;;left:30px;}</style> ';
+		echo ' <div class="debugArray" id="draggable" onclick="this.style.display=\'none\';"><pre><code>';
+		var_dump($array);
+		echo '<div>|</div>';
+		echo "</code></pre></div>";
+	}
+	
+	/**
+	 * Limit point from string given
+	 *
+	 * @param String $str
+	 * @param Integer $limit
+	 * @return unknown
+	 */
+	public function limitPoint($str,$limit=3){
+		if(strpos($str,",")!==false){
+			list($numero,$decimal) = explode(",",$str);
+			if(strlen($decimal)>$limit){
+				$decimal = substr($decimal,0,$limit);
+			}
+			return $numero.",".$decimal;
+		} elseif(strpos($str,".")!==false) {
+			list($numero,$decimal) = explode(".",$str);
+			if(strlen($decimal)>$limit){
+				$decimal = substr($decimal,0,$limit);
+			}
+			return $numero.".".$decimal;
+		} else {
+			return $str;
+		}
+	}
+	
+	/**
+	 * This function delete repeated data in the array
+	 *
+	 * @param Array $array
+	 * @return Array
+	 */
+	public function array_diff_values($array){ // Under review
+		if(is_array($array)){
+			$numArray = count($array);
+			$newArray = array();
+	
+			if($numArray>0){
+				$newArray[0] = $array[0];
+				$i=0;
+				do {
+					foreach ($array AS $key=>$value){
+						if(!in_array($value,$newArray)){
+							$newArray[] = $value;
+						}
+						$i++;
+					}
+				} while ($i<3);
+				return $newArray;
+			} else {
+				// Empty array
+				return false;
+			}
+		} else {
+			// Not array
+			return false;
+		}
+	}
+
+	/*
+	 *********************************************************************
+	@function to replace  spaces from dash or underscore  from title
+	@param 	string	$str
+	@param 	string	$seprator
+	@param 	boolen	$lowercase
+	@return String	$myTitle
+	*********************************************************************
+	*/
+	public function url_title($str, $separator = 'underscore', $lowercase = FALSE)
+	{
+		if ($separator == 'dash')
+		{
+			$search		= '_';
+			$replace	= '-';
+		}
+		else
+		{
+			$search		= '-';
+			$replace	= '_';
+		}
+	
+		$trans = array(
+				'&\#\d+?;'				=> '',
+				'&\S+?;'				=> '',
+				'\s+'					=> $replace,
+				'[^a-z0-9\-\._]'		=> '',
+				$replace.'+'			=> $replace,
+				$replace.'$'			=> $replace,
+				'^'.$replace			=> $replace,
+				'\.+$'					=> ''
+		);
+	
+		$str = strip_tags($str);
+	
+		foreach ($trans as $key => $val)
+		{
+			$str = preg_replace("#".$key."#i", $val, $str);
+		}
+	
+		if ($lowercase === TRUE)
+		{
+			$str = strtolower($str);
+		}
+	
+		$myTitle=trim(stripslashes($str));
+		return $myTitle;
+	}
+	
+	
+	/*
+	 *************************************
+	*function to get uri segment
+	
+	*@param  int 	$seg_num
+	*@return String $mySegment
+	**************************************
+	*/
+	
+	public function uri_segment($seg_num='2')
+	{
+		if ($_SERVER["SERVER_PORT"] != "80")
+		{
+			$pageURL = $_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
+		}
+		else
+		{
+			$pageURL= $_SERVER["REQUEST_URI"];
+		}
+	
+		$mySegments = explode('/',$pageURL);
+	
+		$mySegment = $mySegments[$seg_num];
+	
+	
+	
+		if($mySegment == NULL)
+			return FALSE;
+		else
+			return $mySegment;
+	}
+	
+	
+	
+	/*
+	 **********************************************
+	functiont to get full url of a Web Page
+	@param 	NULL	NULL
+	@return String 	$pageURL
+	
+	***********************************************
+	*/
+	public function complete_url()
+	{
+		$pageURL = (@$_SERVER["HTTPS"] == "on") ? "https://" : "http://";
+	
+		if ($_SERVER["SERVER_PORT"] != "80")
+			$pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
+	
+		else
+			$pageURL .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
+	
+		return $pageURL;
+	
+	}
+	public function script_name(){
+		$fullpath=$_SERVER['SCRIPT_FILENAME'];
+		return basename($fullpath);
+	}
+	/***********************************************
+	 functiont to genrate a ramdom string of desirable length
+	@param 	int		$len
+	@return String 	$rndString
+	
+	***********************************************/
+	
+	public function genRandomString($len,$characters="0123456789abcdefghijklmnopqrstuvwxyz")
+	{
+		$length = $len;
+	
+		//$characters = "0123456789abcdefghijklmnopqrstuvwxyz";
+	
+		$rndString = "";
+	
+		for ($p = 0; $p < $length; $p++)
+		{
+		$chr_len=strlen($characters);
+		$rand_no=mt_rand(0,$chr_len);
+		$rndString .= $characters[$rand_no];
+		}
+	
+		return $rndString;
+	}
+	
+	public function spamchk($field)
+	{
+		$field=filter_var($field, FILTER_SANITIZE_EMAIL);
+	
+		if(filter_var($field, FILTER_VALIDATE_EMAIL))
+			return TRUE;
+		else
+			return FALSE;
+	
+	}
+	private function cleanInput($input)
+	{
+		$search = array(
+				'@<script[^>]*?>.*?</script>@si',   // Strip out javascript
+				'@<[\/\!]*?[^<>]*?>@si',            // Strip out HTML tags
+				'@<style[^>]*?>.*?</style>@siU',    // Strip style tags properly
+				'@<![\s\S]*?--[ \t\n\r]*>@'         // Strip multi-line comments
+		);
+	
+		$output = preg_replace($search, '', $input);
+		return $output;
+	}
+	 
+	function sanitize($input)
+	{
+		if (is_array($input))
+		{
+			foreach($input as $var=>$val) {
+				$output[$var] = $this->sanitize($val);
+			}
+		}
+		else
+		{
+			//require_once('conn.php');
+			if (get_magic_quotes_gpc())
+			{
+				$input = stripslashes($input);
+			}
+			$input  = $this->cleanInput($input);
+			$output = mysql_real_escape_string($input);
+		}
+		return $output;
+	}
+	
+	function arraykey_to_var($var,$debug=0) {
+		foreach($var  as $key=>$value)
+		{
+			global $$key;
+			$$key = $value;
+			if($debug==1)
+			{
+				echo '$'.$key.',';
+				//echo '$'.$key.'='.$value.',<br />';
+			}
+				
+		}
+	}
+	
+	function msg_box($message_string,$msg_type,$width,$isPopup,$close)
+	{
+		$message="<style>
+					.msg_box_popup{
+						background:rgba(0,0,0,0.85);
+						position:fixed;
+						top:0;left:0;
+						width:100%;
+						height:100%;
+						z-index:1000;
+						padding-top:300px;
+					}
+					#error{
+						color: black;
+					   	margin: 40px auto 0;
+					    position: relative;
+					   	width: $width;
+						text-align:center;
+					}
+					#error h2 {
+						color:black;
+						font-size: 13px;
+						color: 
+						#333;
+						margin: 0;
+						padding: 0;
+					}
+					#error p{
+						display: block;
+						-webkit-margin-before: 1em;
+						-webkit-margin-after: 1em;
+						-webkit-margin-start: 0px;
+						-webkit-margin-end: 0px;
+					}
+					.error {
+						background:#FFEBE8 url('images/error.png') no-repeat 10px center;
+						border-color: #DD3C10;
+						color:black;
+					}
+					.success {
+						background-color:#E2FEE8;
+						border-color:#39DF0F;
+						color:black;
+					}
+					.UIMessageBox {
+						padding: 10px;
+						border-width: 1px;
+						border-style: solid;
+						color:black;
+					}
+					</style>";
+		
+		if($isPopup==TRUE){
+			if($close==TRUE){
+				$closestr='onclick=\'this.style.display="none"\'';
+			}
+			$message.='<div class="msg_box_popup" '.$closestr.'>';
+		}
+		$message.='<div id="error" class="UIMessageBox '.$msg_type.'">'.$message_string.'</div>';
+		if($isPopup==TRUE){
+			$message.='</div>';
+		}
+		echo $message;
+	
+	}
+	
+	function brHtmlTag($number){
+		for($i=1;$i<=$number;$i++)
+			echo '<br />';
+	}
+	 
+	function nbspHtmlTag($number){
+		for($i=1;$i<=$number;$i++)
+		echo '&nbsp;';
+	}
+	function get_file_extension($file_name)
+	{
+		return substr(strrchr($file_name,'.'),1);
+	}
+	function myExplode($str,$limit=10)
+	{
+		if(stripos($str," ")){
+			$ex_str = explode(" ",$str);
+			if(count($ex_str)>$limit){
+				for($i=0;$i<$limit;$i++){
+					$str_s.=$ex_str[$i]." ";
+				}
+				return $str_s;
+			}else{
+				return $str;
+			}
+		}else{
+			return $str.'...';
+		}
+	}
+	function get_time($add_days){
+		$current_time=time();
+		echo $current_time+(86400*$add_days);
+	}
+
+	function return_time($add_days){
+		$current_time=time();
+		return $current_time+(86400*$add_days);
+	}
+	
+	function addjs($handle,$src,$obj){
+		$obj->jsArray[$handle]=$src;
+		
+	}
+	
+	
+	function get_js($obj) {
+		if($obj->jsArray){
+			foreach($obj->jsArray as $js_string){
+				$output.="<script type='text/javascript' src='".$js_string."'></script>\n";
+					}
+			echo $output;
+		}
+		
+	}
+	
+	function inc($filename) {
+		
+			$result='./includes/'.$filename;
+			require_once $result;
+		
+		
+	}
+	function get_page($pagename) {
+		require_once './'.$pagename.'.php';
+	}
+	function get_siteinfo($option){
+		$sql="select option_value from options where option_name='$option'";
+		$value=$this->select_sql($sql,Array_N);
+		return $value[0];
+	}
+	function siteinfo($option){
+		$sql="select option_value from options where option_name='$option'";
+		$value=$this->select_sql($sql,ARRAY_N);
+		echo $value[0][0];
+	}
+	function process_page($filename) {
+			
+		$filename=substr($filename, 0,strlen($filename)-4);
+		
+		echo $filename.'_process.php';
+	}
+	
+	/**
+	 * Function to convert xml object to array
+	 * @param obj $arrObjData
+	 * @param array $arrSkipIndices
+	 * @return array $arrData
+	 */
+	
+	function xml_obj_to_array($arrObjData, $arrSkipIndices = array())
+	{
+		$arrData = array();
+	
+		// if input is object, convert into array
+		if (is_object($arrObjData)) {
+			$arrObjData = get_object_vars($arrObjData);
+		}
+	
+		if (is_array($arrObjData)) {
+			foreach ($arrObjData as $index => $value) {
+				if (is_object($value) || is_array($value)) {
+					$value = $this->xml_obj_to_array($value, $arrSkipIndices); // recursive call
+				}
+				if (in_array($index, $arrSkipIndices)) {
+					continue;
+				}
+				$arrData[$index] = $value;
+			}
+		}
+		return $arrData;
+	}
+	
+	
+	/**
+	 * Function to get latitudes from array of coordinates
+	 * @param unknown_type $array
+	 * @return mixed
+	 */
+	
+	function latitude_array($array){
+		$i=-1;
+		foreach ($array as $value)
+		{
+			if($i%2==0){
+				$even_array[$i]=$value;
+			}
+	
+			$i++;
+		}
+		foreach ($even_array as $key =>$value){
+			if ($even_array[$key] == '')
+			{
+				unset($even_array[$key]);
+			}
+		}
+	
+		$lat['max']=max($even_array);
+		$lat['min']=min($even_array);
+		return $lat;
+	}
+	/**
+	 * Function to get longitude from array of coordinates
+	 * @param unknown_type $array
+	 * @return mixed
+	 */
+	function longitude_array($array){
+		$i=1;
+		foreach ($array as $value)
+		{
+			if($i%2!=0){
+				$odd_array[$i]=$value;
+			}
+	
+			$i++;
+		}
+		foreach ($odd_array as $key =>$value){
+			if ($odd_array[$key] == '')
+			{
+				unset($odd_array[$key]);
+			}
+		}
+		$long['max']=max($odd_array);
+		$long['min']=min($odd_array);
+		return $long;
+	}
+	function update_template($templateURL,$array){
+		
+		$mailTemplate=file_get_contents($templateURL, FILE_USE_INCLUDE_PATH);
+		if(is_array($array)){
+			foreach ($array as $key => $value){
+				$mailTemplate=str_replace($key, $value, $mailTemplate);
+			}
+		}
+		else{
+			
+		}
+		return $mailTemplate;		
+		
+		
+	}
+	
+	/**
+	 * SELECT QUERY
+	 * @param String $sql
+	 * @param String Array array_type, ARRAY_N Retrun Numaric array, ARRAY_A Retrun Assosiative array
+	 * @return Array Result  
+	 * 
+	 */
+	protected  function select_sql($sql,$array_type){
+		
+		$result=$this->sqlordie($sql);
+	$i=1;	
+		if($array_type==ARRAY_N){
+			while($data=mysql_fetch_row($result))
+			{
+				$store[]=$data;
+			}
+			
+		}
+		
+		elseif ($array_type==ARRAY_A){
+			
+		while($data=mysql_fetch_assoc($result))
+			{
+				
+				
+				$store[]=$data;
+			}
+		}
+		if($store){	
+			foreach ($store as $key => $value){
+				$array[$key]=$value;
+			}		
+		}
+		//var_dump(debug_backtrace());
+		return $array;
+	}
+	
+	
+	
+	//Aman created
+	protected  function sql_alt($sql){
+		$result=$this->sqlordie($sql);
+		$store=mysql_fetch_row($result);
+		//debug_print_backtrace();
+		return $store;
+	}
+	
+	
+	
+	protected  function insert_array($table, $insert_values,$error_no=0) {
+	
+		foreach($insert_values as $key=>$value) {
+			$keys[] = $key;
+			$insertvalues[] = '\''.$value.'\'';
+		}
+	
+		$keys = implode(',', $keys);
+		$insertvalues = implode(',', $insertvalues);
+	
+		$sql = "INSERT INTO $table ($keys) VALUES ($insertvalues)";
+	
+		return $this->sqlordie($sql,$error_no);
+	
+	}
+	
+	protected  function update_array($table, $keyColumnName, $id, $update_values) {
+	
+	
+		foreach($update_values as $key=>$value) {
+	
+			$sets[] = $key.'=\''.$value.'\'';
+	
+		}
+		$sets = implode(',', $sets);
+	
+		$sql = "UPDATE $table SET $sets WHERE $keyColumnName = '$id'";
+	
+		return $this->sqlordie($sql);
+	}
+	
+	
+	
+	protected function numrows($sql) {
+		$res=$this->sqlordie($sql);
+		return mysql_num_rows($res);
+	}
+	protected  function sqlordie($sql,$error_no=0) {
+	
+		$return_result = mysql_query($sql, $this->link);
+		if($return_result) {
+			return $return_result;
+		} else {
+			if($error_no==0)
+				$this->sql_error($sql);
+			else 
+			return	$this->sql_error_no($sql);
+		}
+	}
+	
+	protected function sql_error($sql) {
+		echo mysql_error($this->link).'<br>';
+		echo('error: '. $sql);
+	}
+	
+	protected function sql_error_no($sql) {
+		return mysql_errno($this->link);
+		
+		
+	}
+	
+}
